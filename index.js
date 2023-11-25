@@ -50,7 +50,7 @@ async function run() {
 
 
 
-        // Create userKey & set to browser cookie
+        // UserKey Create / remove & set to browser cookie
         app.post('/jwt', async (req, res) => {
 
             try {
@@ -68,7 +68,24 @@ async function run() {
             }
 
         })
-        // Create userKey & set to browser cookie End
+        
+        app.post('/logout', async (req, res) => {
+         try{
+
+             const user = req.body;
+             res.clearCookie('userKey', {
+                 maxAge: 0,
+                 secure: true,
+                 sameSite: 'none'
+             }).send({ success: true })
+
+         }catch(error){
+            console.log(error.message)
+         }
+        })
+        // UserKey Create / remove  & set to browser cookie end
+
+
 
 
 
