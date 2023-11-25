@@ -37,12 +37,67 @@ const client = new MongoClient(uri, {
         deprecationErrors: true,
     }
 });
+
+
+
+
+
 async function run() {
     try {
         // await client.connect();
 
+        const userCollection = client.db('biyebari').collection('users');
 
-        
+
+
+        // Create userKey & set to browser cookie
+        app.post('/jwt', async (req, res) => {
+
+            try {
+                const user = req.body;
+                const userKey = jwt.sign(user, process.env.SECRET_KEY, { expiresIn: '12h' })
+
+                res.cookie('userKey', userKey, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: 'none'
+                }).send({ success: true })
+
+            } catch (error) {
+                console.log(error.message)
+            }
+
+        })
+        // Create userKey & set to browser cookie End
+
+
+
+
+
+        // Store a user 
+        app.post('/store-users', async (req, res) => {
+            try {
+                const newUser = req.body;
+
+                const query = { email: newUser.email };
+                const existingUser = await userCollection.findOne(query);
+                if (existingUser) {
+                    return res.send({ message: 'user already exists', insertedId: null });
+                }
+
+                const result = await userCollection.insertOne(newUser);
+                res.send(result)
+            } catch (err) {
+                console.log(err.message)
+            }
+        })
+        //Store a user End
+
+
+
+
+
+
 
 
 
