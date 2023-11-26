@@ -145,7 +145,7 @@ async function run() {
         // Get biodatas for a user End
 
 
-        // Get all biodatas
+        // Get all biodatas with filtering
         app.get('/biodatas', async (req, res) => {
             try {
 
@@ -166,9 +166,6 @@ async function run() {
                 const gteValue = req.query.gteValue;
                 const lteValue = req.query.lteValue;
                 if(gteValue && lteValue){
-                    console.log('gteValue', typeof gteValue)
-                    console.log('lteValue', lteValue)
-
                     const filter = { age: { $gte: gteValue, $lte: lteValue }};
                     const result = await biodataCollection.find(filter).toArray();
                     return res.send(result);
@@ -182,7 +179,7 @@ async function run() {
                 console.log(error);
             }
         })
-        // Get all biodatas End
+        // Get all biodatas with filtering End
 
 
 
