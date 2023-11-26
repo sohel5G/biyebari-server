@@ -88,10 +88,6 @@ async function run() {
 
 
 
-
-
-
-
         // Store a user 
         app.post('/store-users', async (req, res) => {
             try {
@@ -133,11 +129,36 @@ async function run() {
         // Store Biodatas End 
 
 
+        // Get biodatas for a user
+        app.get('/biodatas/:userEmail', async (req, res) => {
+            try {
+                const userEmail = req.params.userEmail;
+                const query = { email: userEmail };
+
+                const result = await biodataCollection.find(query).toArray();
+                res.send(result);
+
+            } catch (error) {
+                console.log(error.message);
+            }
+        })
+        // Get biodatas for a user End
 
 
+        // Get all biodatas
+        app.get('/biodatas', async (req, res) => {
+            try {
+
+                const result = await biodataCollection.find().toArray();
+                res.send(result);
+
+            } catch (error) {
+                console.log(error.message);
+            }
+        })
+        // Get all biodatas End
 
 
-        
 
 
 
