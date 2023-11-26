@@ -149,11 +149,37 @@ async function run() {
         app.get('/biodatas', async (req, res) => {
             try {
 
+                const biodataType = req.query.biodatatype;
+                if (biodataType){
+                    const filter = { type: biodataType };
+                    const result = await biodataCollection.find(filter).toArray()
+                    return res.send(result);
+                }
+
+                const divisionValue = req.query.divisionvalue;
+                if (divisionValue){
+                    const filter = { permanentDivision: divisionValue };
+                    const result = await biodataCollection.find(filter).toArray()
+                    return res.send(result);
+                }
+
+                const gteValue = req.query.gteValue;
+                const lteValue = req.query.lteValue;
+                if(gteValue && lteValue){
+                    console.log('gteValue', typeof gteValue)
+                    console.log('lteValue', lteValue)
+
+                    const filter = { age: { $gte: gteValue, $lte: lteValue }};
+                    const result = await biodataCollection.find(filter).toArray();
+                    return res.send(result);
+                } 
+
+
                 const result = await biodataCollection.find().toArray();
                 res.send(result);
 
             } catch (error) {
-                console.log(error.message);
+                console.log(error);
             }
         })
         // Get all biodatas End
