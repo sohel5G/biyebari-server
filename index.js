@@ -4,7 +4,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 require('dotenv').config();
 const port = process.env.PORT || 5000;
@@ -48,8 +48,16 @@ async function run() {
 
         const userCollection = client.db('biyebari').collection('users');
         const biodataCollection = client.db('biyebari').collection('biodatas');
+        const favoriteCollection = client.db('biyebari').collection('favorites');
 
 
+
+
+
+
+
+
+        // ------------------------- USER KEY --------------------
 
         // UserKey Create / remove & set to browser cookie
         app.post('/jwt', async (req, res) => {
@@ -86,7 +94,16 @@ async function run() {
         })
         // UserKey Create / remove  & set to browser cookie end
 
+        // ------------------------- USER KEY END --------------------
 
+
+
+
+
+
+
+
+        // ------------------------- USER --------------------
 
         // Store a user 
         app.post('/store-users', async (req, res) => {
@@ -107,8 +124,129 @@ async function run() {
         })
         //Store a user End
 
+        // Get  Users for approve premium
+        app.get('/users/get-for-approved-premium', async (req, res) => {
+            const result = await userCollection.find({ isPro: 'Pending' }).toArray();
+            res.send(result);
+        })
+        // Get  Users for approve premium End
+
+        // Get single user by email 
+        app.get('/user/self/:useremail', async (req, res) => {
+            try {
+                const userEmail = req.params.useremail;
+                const query = { email: userEmail };
+                const result = await userCollection.findOne(query);
+                res.send(result);
+            } catch (error) {
+                console.log(error)
+            }
+        })
+        // Get single user by email  End
+
+        // Request user/biodata for pro 
+        app.put('/request/user/to-pro/:useremail', async (req, res) => {
+            try {
+
+                const userEmail = req.params.useremail;
+                const query = { email: userEmail };
+
+                const getThisUserBiodataId = await biodataCollection.findOne(query);
+                const thisUserBiodataId = getThisUserBiodataId?.biodataId;
+
+                const updateDoc = {
+                    $set: {
+                        isPro: 'Pending',
+                        biodataId: thisUserBiodataId
+                    },
+                };
+
+                const resultForUser = await userCollection.updateOne(query, updateDoc);
+                const resultForBiodata = await biodataCollection.updateOne(query, updateDoc);
+                const result = { resultForUser, resultForBiodata }
+                res.send(result);
+
+            } catch (error) {
+                console.log(error);
+            }
+        })
+        // Request user/biodata for pro End
 
 
+        // ------------------------- USER END --------------------
+
+
+
+
+
+
+
+
+
+
+
+
+        // ------------------------- FAVORITE --------------------
+
+        // Store Favorite item 
+        app.post('/favorites', async (req, res) => {
+            try {
+                const newFavorite = req.body;
+
+                console.log(newFavorite);
+
+                const result = await favoriteCollection.insertOne(newFavorite);
+                res.send(result)
+
+            } catch (error) {
+                console.log(error)
+            }
+        })
+        // Store Favorite item End
+        // Get Favorite items for a user
+        app.get('/favorites/:userEmail', async (req, res) => {
+            try {
+                const userEmail = req.params.userEmail;
+                const query = { favMakerEmail: userEmail };
+
+                const result = await favoriteCollection.find(query).toArray();
+                res.send(result);
+
+            } catch (error) {
+                console.log(error.message);
+            }
+        })
+        // Get Favorite items for a user End
+        // Delete a Favorite item 
+        app.delete('/favorites/:favitemid', async (req, res) => {
+            try {
+
+                const favItemId = req.params.favitemid;
+                const filter = { _id: new ObjectId(favItemId) };
+                const result = await favoriteCollection.deleteOne(filter);
+                res.send(result);
+
+            } catch (error) {
+                console.log(error)
+            }
+        })
+        // Delete a Favorite item  End
+
+        // ------------------------- FAVORITE END --------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // ------------------------- BIODATA --------------------
 
         // Store Biodatas 
         app.post('/biodatas', async (req, res) => {
@@ -128,36 +266,19 @@ async function run() {
         })
         // Store Biodatas End 
 
-
-        // Get biodatas for a user
-        app.get('/biodatas/:userEmail', async (req, res) => {
-            try {
-                const userEmail = req.params.userEmail;
-                const query = { email: userEmail };
-
-                const result = await biodataCollection.find(query).toArray();
-                res.send(result);
-
-            } catch (error) {
-                console.log(error.message);
-            }
-        })
-        // Get biodatas for a user End
-
-
         // Get all biodatas with filtering
         app.get('/biodatas', async (req, res) => {
             try {
 
                 const biodataType = req.query.biodatatype;
-                if (biodataType){
+                if (biodataType) {
                     const filter = { type: biodataType };
                     const result = await biodataCollection.find(filter).toArray()
                     return res.send(result);
                 }
 
                 const divisionValue = req.query.divisionvalue;
-                if (divisionValue){
+                if (divisionValue) {
                     const filter = { permanentDivision: divisionValue };
                     const result = await biodataCollection.find(filter).toArray()
                     return res.send(result);
@@ -165,11 +286,11 @@ async function run() {
 
                 const gteValue = req.query.gteValue;
                 const lteValue = req.query.lteValue;
-                if(gteValue && lteValue){
-                    const filter = { age: { $gte: gteValue, $lte: lteValue }};
+                if (gteValue && lteValue) {
+                    const filter = { age: { $gte: gteValue, $lte: lteValue } };
                     const result = await biodataCollection.find(filter).toArray();
                     return res.send(result);
-                } 
+                }
 
 
                 const result = await biodataCollection.find().toArray();
@@ -182,6 +303,58 @@ async function run() {
         // Get all biodatas with filtering End
 
 
+
+
+
+        // // Get biodatas for a user
+        // app.get('/biodatas/:userEmail', async (req, res) => {
+        //     try {
+        //         const userEmail = req.params.userEmail;
+        //         const query = { email: userEmail };
+
+        //         const result = await biodataCollection.find(query).toArray();
+        //         res.send(result);
+
+        //     } catch (error) {
+        //         console.log(error.message);
+        //     }
+        // })
+        // // Get biodatas for a user End
+
+
+
+        // Get single biodata for single page by ID
+        app.get('/biodata/:biodataid', async (req, res) => {
+            try {
+
+                const buiodataId = req.params.biodataid;
+                const filter = { _id: new ObjectId(buiodataId) };
+                const result = await biodataCollection.findOne(filter);
+                res.send(result);
+
+            } catch (error) {
+                console.log(error)
+            }
+        })
+        // Get single biodata for single page by ID end
+
+
+        // Get Own single biodata by user email
+        app.get('/biodata/own/:useremail', async (req, res) => {
+            try {
+
+                const userEmail = req.params.useremail;
+                const filter = { email: userEmail };
+                const result = await biodataCollection.findOne(filter);
+                res.send(result);
+
+            } catch (error) {
+                console.log(error)
+            }
+        })
+        // Get Own single biodata by user email  end
+
+        // ------------------------- BIODATA END --------------------
 
 
 
