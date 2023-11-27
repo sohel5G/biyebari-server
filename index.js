@@ -124,6 +124,13 @@ async function run() {
         })
         //Store a user End
 
+        // Get all user from admin Dashboard 
+        app.get('/users/all', async (req, res) => {
+            const result = await userCollection.find().toArray()
+            res.send(result);
+        })
+        // Get all user from admin Dashboard End
+
         // Get  Users for approve premium
         app.get('/users/get-for-approved-premium', async (req, res) => {
             const result = await userCollection.find({ isPro: 'Pending' }).toArray();
@@ -143,6 +150,24 @@ async function run() {
             }
         })
         // Get single user by email  End
+
+
+        // User role update  
+        app.put('/users/update-role/:useremail', async (req, res) => {
+            const userEmail = req.params.useremail;
+            const query = { email: userEmail };
+
+            const updateDoc = {
+                $set: {
+                    userRole: 'Admin',
+                },
+            };
+
+            const result = await userCollection.updateOne(query, updateDoc);
+            res.send(result);
+        })
+        // User role update End 
+
 
         // Request user/biodata for pro 
         app.put('/request/user/to-pro/:useremail', async (req, res) => {
@@ -171,6 +196,30 @@ async function run() {
             }
         })
         // Request user/biodata for pro End
+
+        // Approved user/biodata Premium request 
+        app.put('/approved/user/to-premium/:useremail', async (req, res) => {
+            try {
+
+                const userEmail = req.params.useremail;
+                const query = { email: userEmail };
+
+                const updateDoc = {
+                    $set: {
+                        isPro: 'Premium',
+                    },
+                };
+
+                const resultForUser = await userCollection.updateOne(query, updateDoc);
+                const resultForBiodata = await biodataCollection.updateOne(query, updateDoc);
+                const result = { resultForUser, resultForBiodata }
+                res.send(result);
+
+            } catch (error) {
+                console.log(error);
+            }
+        })
+        // Approved user/biodata Premium request  End
 
 
         // ------------------------- USER END --------------------
