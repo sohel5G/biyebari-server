@@ -100,6 +100,55 @@ async function run() {
 
 
 
+        // -----------  STRIPE PAYMENT METHOD API------------------
+        app.post('/create-stripe-payment-intent', async (req, res) => {
+            try {
+                const { price } = req.body;
+                const amount = parseInt(price * 100);
+
+                const paymentIntent = await stripe.paymentIntents.create({
+                    amount: amount,
+                    currency: 'usd',
+                    payment_method_types: ['card']
+                });
+
+                res.send({
+                    clientSecret: paymentIntent.client_secret
+                })
+
+            } catch (err) {
+                console.log(err.message)
+            }
+
+        })
+        // -----------  STRIPE PAYMENT METHOD API------------------
+
+        // // -----------  POST ITEMS AFTER PAYMENT DONE------------------
+        // app.post('/payment-done', async (req, res) => {
+        //     try {
+
+        //         const newPayment = req.body;
+        //         const paymentResult = await paymentDoneCollection.insertOne(newPayment);
+
+        //         const query = {
+        //             _id: {
+        //                 $in: newPayment.cartIds.map(id => new ObjectId(id))
+        //             }
+        //         }
+        //         const deleteResult = await cartCollection.deleteMany(query);
+
+        //         res.send({ paymentResult, deleteResult });
+
+        //     } catch (err) {
+        //         console.log(err);
+        //     }
+        // })
+        // // -----------  POST ITEMS AFTER PAYMENT DONE END------------------
+
+
+
+
+
 
 
 
@@ -318,6 +367,14 @@ async function run() {
         // Get all biodatas with filtering
         app.get('/biodatas', async (req, res) => {
             try {
+
+                const PremiumBiodata = req.query.premium;
+                console.log(PremiumBiodata)
+                if (PremiumBiodata) {
+                    const filter = { isPro: PremiumBiodata };
+                    const result = await biodataCollection.find(filter).toArray()
+                    return res.send(result);
+                }
 
                 const biodataType = req.query.biodatatype;
                 if (biodataType) {
