@@ -498,6 +498,51 @@ async function run() {
         })
         // Store Biodatas End 
 
+
+        // Update Biodatas 
+        app.put('/biodatas/:useremail', async (req, res) => {
+            try {
+                const updateBiodata = req.body;
+
+                const userEmail = req.params.useremail;
+                const query = { email: userEmail };
+
+                const updateDoc = {
+                    $set: {
+                        age: updateBiodata?.age,
+                        birth: updateBiodata?.birth,
+                        email: updateBiodata?.email,
+                        height: updateBiodata?.height,
+                        img: updateBiodata?.img,
+                        inches: updateBiodata?.inches,
+                        mobile: updateBiodata?.mobile,
+                        mothersName: updateBiodata?.mothersName,
+                        name: updateBiodata?.name,
+                        occupation: updateBiodata?.occupation,
+                        race: updateBiodata?.race,
+                        religion: updateBiodata?.religion,
+                        type: updateBiodata?.type,
+                        weight: updateBiodata?.weight,
+                        permanentDivision: updateBiodata?.permanentDivision,
+                        presentDivision: updateBiodata?.presentDivision,
+                        expectedPartnerAge: updateBiodata?.expectedPartnerAge,
+                        expectedPartnerHeight: updateBiodata?.expectedPartnerHeight,
+                        expectedPartnerInches: updateBiodata?.expectedPartnerInches,
+                        expectedPartnerWeight: updateBiodata?.expectedPartnerWeight,
+                        fathersName: updateBiodata?.fathersName
+                    },
+                };
+
+                const result = await biodataCollection.updateOne(query, updateDoc);
+                res.send(result)
+
+            } catch (error) {
+                console.log(error)
+            }
+        })
+        // Update Biodatas End 
+
+
         // Get all biodatas with filtering
         app.get('/biodatas', async (req, res) => {
             try {
