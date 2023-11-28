@@ -52,7 +52,7 @@ async function run() {
         const biodataCollection = client.db('biyebari').collection('biodatas');
         const favoriteCollection = client.db('biyebari').collection('favorites');
         const requestCollection = client.db('biyebari').collection('requests');
-
+        const reviewCollection = client.db('biyebari').collection('reviews');
 
 
 
@@ -219,11 +219,11 @@ async function run() {
 
         // ----------- ADMIN DASHBOARD STATISTIC --------------------
         app.get('/admin/dashboard-statistic', async (req, res) => {
-            try{
+            try {
 
                 const totalBiodata = await biodataCollection.estimatedDocumentCount();
 
-                const maleQuery = { type: 'Male'}
+                const maleQuery = { type: 'Male' }
                 const maleBiodata = await biodataCollection.countDocuments(maleQuery);
 
                 const femaleQuery = { type: 'Female' }
@@ -234,7 +234,7 @@ async function run() {
 
                 const totalRevenue = await requestCollection.find().toArray();
                 const subTotalRevenue = totalRevenue.reduce((total, item) => {
-                    if(item.payed){
+                    if (item.payed) {
                         return total + item.payed;
                     }
                     return total;
@@ -248,7 +248,7 @@ async function run() {
                     subTotalRevenue
                 })
 
-            }catch(err){
+            } catch (err) {
                 console.log(err);
             }
         })
@@ -256,11 +256,30 @@ async function run() {
 
 
 
+        // ----------------- REVIEW -----------------------
 
+        app.post('/post-success-story', async (req, res) => {
+            try {
+                const newStory = req.body;
+                const result = await reviewCollection.insertOne(newStory);
+                res.send(result);
+            } catch (error) {
+                console.log(error)
+            }
+        })
 
+        app.get('/get-success-stories', async (req, res) => {
+            try {
 
+                const result = await reviewCollection.find().toArray();
+                res.send(result);
 
+            } catch (err) {
+                console.log(err)
+            }
+        })
 
+        //----------------- REVIEW END-----------------------
 
 
 
