@@ -10,6 +10,8 @@ require('dotenv').config();
 const port = process.env.PORT || 5000;
 const app = express();
 
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY_TEST);
+
 app.use(cors({
     origin: ['http://localhost:5173', 'https://biyebariapp.netlify.app'],
     credentials: true,
@@ -117,7 +119,7 @@ async function run() {
                 })
 
             } catch (err) {
-                console.log(err.message)
+                console.log(err)
             }
 
         })
