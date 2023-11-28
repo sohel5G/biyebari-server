@@ -209,8 +209,54 @@ async function run() {
 
 
 
-
         // -----------  REQUEST------------------
+
+
+
+
+
+
+
+        // ----------- ADMIN DASHBOARD STATISTIC --------------------
+        app.get('/admin/dashboard-statistic', async (req, res) => {
+            try{
+
+                const totalBiodata = await biodataCollection.estimatedDocumentCount();
+
+                const maleQuery = { type: 'Male'}
+                const maleBiodata = await biodataCollection.countDocuments(maleQuery);
+
+                const femaleQuery = { type: 'Female' }
+                const femaleBiodata = await biodataCollection.countDocuments(femaleQuery);
+
+                const premiumQuery = { isPro: 'Premium' }
+                const premiumBiodata = await biodataCollection.countDocuments(premiumQuery);
+
+                const totalRevenue = await requestCollection.find().toArray();
+                const subTotalRevenue = totalRevenue.reduce((total, item) => {
+                    if(item.payed){
+                        return total + item.payed;
+                    }
+                    return total;
+                }, 0);
+
+                res.send({
+                    totalBiodata,
+                    maleBiodata,
+                    femaleBiodata,
+                    premiumBiodata,
+                    subTotalRevenue
+                })
+
+            }catch(err){
+                console.log(err);
+            }
+        })
+        // ----------- ADMIN DASHBOARD STATISTIC END --------------------
+
+
+
+
 
 
 
