@@ -51,10 +51,7 @@ async function run() {
         const userCollection = client.db('biyebari').collection('users');
         const biodataCollection = client.db('biyebari').collection('biodatas');
         const favoriteCollection = client.db('biyebari').collection('favorites');
-
-
-
-
+        const requestCollection = client.db('biyebari').collection('requests');
 
 
 
@@ -75,7 +72,7 @@ async function run() {
                 }).send({ success: true })
 
             } catch (error) {
-                console.log(error.message)
+                console.log(error)
             }
 
         })
@@ -91,7 +88,7 @@ async function run() {
                 }).send({ success: true })
 
             } catch (error) {
-                console.log(error.message)
+                console.log(error)
             }
         })
         // UserKey Create / remove  & set to browser cookie end
@@ -123,29 +120,97 @@ async function run() {
             }
 
         })
-        // -----------  STRIPE PAYMENT METHOD API------------------
+        //-----------  STRIPE PAYMENT METHOD API------------------
 
-        // // -----------  POST ITEMS AFTER PAYMENT DONE------------------
-        // app.post('/payment-done', async (req, res) => {
-        //     try {
 
-        //         const newPayment = req.body;
-        //         const paymentResult = await paymentDoneCollection.insertOne(newPayment);
 
-        //         const query = {
-        //             _id: {
-        //                 $in: newPayment.cartIds.map(id => new ObjectId(id))
-        //             }
-        //         }
-        //         const deleteResult = await cartCollection.deleteMany(query);
 
-        //         res.send({ paymentResult, deleteResult });
 
-        //     } catch (err) {
-        //         console.log(err);
-        //     }
-        // })
-        // // -----------  POST ITEMS AFTER PAYMENT DONE END------------------
+        // ----------- REQUEST------------------
+
+        // Post a requested Item
+        app.post('/users/post-contact-request', async (req, res) => {
+            try {
+
+                const newRequest = req.body;
+                const result = await requestCollection.insertOne(newRequest);
+
+                res.send(result);
+
+            } catch (err) {
+                console.log(err);
+            }
+        })
+        // Post a requested Item End
+
+
+        // Get requested item for a user
+        app.get('/users/get-contact-request/:useremail', async (req, res) => {
+            try {
+                const userEmail = req.params.useremail;
+                const query = { requesterEmail: userEmail };
+
+                console.log(userEmail)
+
+                const result = await requestCollection.find(query).toArray();
+                res.send(result);
+            } catch (error) {
+                console.log(error)
+            }
+        })
+        // Get requested item for a user end
+
+
+        // Delete a  requested item
+        app.delete('/users/delete-contact-request/:reqitemid', async (req, res) => {
+            try {
+
+                const reqItemId = req.params.reqitemid;
+                const filter = { _id: new ObjectId(reqItemId) };
+                const result = await requestCollection.deleteOne(filter);
+                res.send(result);
+
+            } catch (error) {
+                console.log(error)
+            }
+        })
+        // Delete a  requested item  End
+
+
+
+        // Get requested pending item for a admin
+        app.get('/admin/get-for-approved-request', async (req, res) => {
+            const result = await requestCollection.find({ request: 'Pending' }).toArray();
+            res.send(result);
+        })
+        // Get requested pending item for a admin end
+
+
+
+        // Approved request update by admin 
+        app.put('/admin/approved-contact-request/:itemid', async (req, res) => {
+            try {
+                const ItemId = req.params.itemid;
+                const filter = { _id: new ObjectId(ItemId) };
+
+                const updateDoc = {
+                    $set: {
+                        request: 'Approved',
+                    },
+                };
+
+                const result = await requestCollection.updateOne(filter, updateDoc);
+                res.send(result);
+            } catch (err) {
+                console.log(err)
+            }
+        })
+        // Approved request update by admin
+
+
+
+
+        // -----------  REQUEST------------------
 
 
 
@@ -170,7 +235,7 @@ async function run() {
                 const result = await userCollection.insertOne(newUser);
                 res.send(result)
             } catch (err) {
-                console.log(err.message)
+                console.log(err)
             }
         })
         //Store a user End
@@ -205,17 +270,21 @@ async function run() {
 
         // User role update  
         app.put('/users/update-role/:useremail', async (req, res) => {
-            const userEmail = req.params.useremail;
-            const query = { email: userEmail };
+            try {
+                const userEmail = req.params.useremail;
+                const query = { email: userEmail };
 
-            const updateDoc = {
-                $set: {
-                    userRole: 'Admin',
-                },
-            };
+                const updateDoc = {
+                    $set: {
+                        userRole: 'Admin',
+                    },
+                };
 
-            const result = await userCollection.updateOne(query, updateDoc);
-            res.send(result);
+                const result = await userCollection.updateOne(query, updateDoc);
+                res.send(result);
+            } catch (err) {
+                console.log(err)
+            }
         })
         // User role update End 
 
@@ -293,8 +362,6 @@ async function run() {
             try {
                 const newFavorite = req.body;
 
-                console.log(newFavorite);
-
                 const result = await favoriteCollection.insertOne(newFavorite);
                 res.send(result)
 
@@ -313,7 +380,7 @@ async function run() {
                 res.send(result);
 
             } catch (error) {
-                console.log(error.message);
+                console.log(error);
             }
         })
         // Get Favorite items for a user End
@@ -361,7 +428,7 @@ async function run() {
                 res.send(result)
 
             } catch (error) {
-                console.log(error.message)
+                console.log(error)
             }
         })
         // Store Biodatas End 
@@ -371,7 +438,6 @@ async function run() {
             try {
 
                 const PremiumBiodata = req.query.premium;
-                console.log(PremiumBiodata)
                 if (PremiumBiodata) {
                     const filter = { isPro: PremiumBiodata };
                     const result = await biodataCollection.find(filter).toArray()
