@@ -223,6 +223,8 @@ async function run() {
 
                 const totalBiodata = await biodataCollection.estimatedDocumentCount();
 
+                const totalMarrige = await reviewCollection.estimatedDocumentCount();
+
                 const maleQuery = { type: 'Male' }
                 const maleBiodata = await biodataCollection.countDocuments(maleQuery);
 
@@ -245,7 +247,8 @@ async function run() {
                     maleBiodata,
                     femaleBiodata,
                     premiumBiodata,
-                    subTotalRevenue
+                    subTotalRevenue,
+                    totalMarrige
                 })
 
             } catch (err) {
