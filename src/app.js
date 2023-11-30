@@ -6,9 +6,7 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
 
-
 applyCorsMiddleware(app);
-
 
 const authenticationRouter = require('./routes/authentication');
 const successStory = require('./routes/successStory');
@@ -18,7 +16,7 @@ const favoritesItems = require('./routes/favorites');
 const requests = require('./routes/requests');
 const adminDashboardStatistic = require('./routes/adminDashboardStatistic');
 const stripePaymentIntentd = require('./routes/stripePaymentIntent/stripePaymentIntent');
-
+const totalDataForPagination = require('./routes/totalDataForPagination');
 
 app.get("/", (req, res) => {
     res.send("BiyeBari server is running");
@@ -30,7 +28,6 @@ const DBconnectBeforeServerRun = async () => {
     })
 }
 DBconnectBeforeServerRun();
-
 
 app.use(authenticationRouter);
 
@@ -48,4 +45,4 @@ app.use(adminDashboardStatistic);
 
 app.use(stripePaymentIntentd);
 
-
+app.use(totalDataForPagination);

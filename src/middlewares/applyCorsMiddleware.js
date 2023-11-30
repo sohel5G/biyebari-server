@@ -15,9 +15,4 @@ const applyCorsMiddleware = (app) => {
 
 }
 
-module.exports = applyCorsMiddleware;
-
-
-
-
-
+module.exports = applyCorsMiddleware; 
