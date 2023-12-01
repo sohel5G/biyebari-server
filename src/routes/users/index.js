@@ -28,7 +28,5 @@ router.put('/approved/user/to-premium/:useremail', adminAproveUserToPremium )
 
 
 
-
-
 module.exports = router;
 

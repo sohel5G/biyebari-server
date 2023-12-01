@@ -72,7 +72,7 @@ const RequestUserAndBiodataForPro = async (req, res) => {
         const userEmail = req.params.useremail;
         const query = { email: userEmail };
 
-        const getThisUserBiodataId = await Users.findOne(query);
+        const getThisUserBiodataId = await Biodata.findOne(query);
         const thisUserBiodataId = getThisUserBiodataId?.biodataId;
 
         const updateDoc = {
