@@ -1,18 +1,15 @@
 const Biodata = require("../../modals/biodata");
 
-const totalDataForPagination = async (req, res) => {
+const totalBiodataForPagination = async (req, res) => {
     try {
-        
-        const totalBiodata = await Biodata.countDocuments();
 
-        res.send({ totalBiodata });
+        const totalBiodataForPagination = await Biodata.countDocuments();
+
+        res.send({ totalBiodataForPagination });
 
     } catch (error) {
         console.log(error)
     }
 }
 
-
-module.exports = { totalDataForPagination };
-
-
+module.exports = { totalBiodataForPagination };

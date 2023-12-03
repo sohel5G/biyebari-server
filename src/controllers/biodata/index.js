@@ -4,24 +4,27 @@ const Biodata = require("../../modals/biodata");
 const getBiodataWithFilters = async (req, res) => {
     try {
 
+        const pageNo = parseInt(req.query.currentPage - 1);
+        const totalItem = parseInt(req.query.itemsPerPage);
+
         const PremiumBiodata = req.query.premium;
         if (PremiumBiodata) {
             const filter = { isPro: PremiumBiodata };
-            const result = await Biodata.find(filter);
+            const result = await Biodata.find(filter).skip(pageNo * totalItem).limit(totalItem);
             return res.send(result);
         }
 
         const biodataType = req.query.biodatatype;
         if (biodataType) {
             const filter = { type: biodataType };
-            const result = await Biodata.find(filter);
+            const result = await Biodata.find(filter).skip(pageNo * totalItem).limit(totalItem);
             return res.send(result);
         }
 
         const divisionValue = req.query.divisionvalue;
         if (divisionValue) {
             const filter = { permanentDivision: divisionValue };
-            const result = await Biodata.find(filter);
+            const result = await Biodata.find(filter).skip(pageNo * totalItem).limit(totalItem);
             return res.send(result);
         }
 
@@ -29,12 +32,12 @@ const getBiodataWithFilters = async (req, res) => {
         const lteValue = req.query.lteValue;
         if (gteValue && lteValue) {
             const filter = { age: { $gte: gteValue, $lte: lteValue } };
-            const result = await Biodata.find(filter);
+            const result = await Biodata.find(filter).skip(pageNo * totalItem).limit(totalItem);
             return res.send(result);
         }
 
 
-        const result = await Biodata.find();
+        const result = await Biodata.find().skip(pageNo * totalItem).limit(totalItem);
         res.send(result);
 
     } catch (error) {
